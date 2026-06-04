@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IDD — Infrastructure Design Document | peviitor.ro</title>
+  <meta name="description" content="Infrastructure Design Document pentru platforma peviitor.ro — motor de căutare locuri de muncă din România">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏗️</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue-900: #0a2e42;
+      --blue-800: #0f4260;
+      --blue-700: #1a6b8a;
+      --blue-600: #1e7fa3;
+      --blue-500: #2693bc;
+      --blue-400: #4dafd1;
+      --blue-100: #e3f2f9;
+      --blue-50: #f0f8fc;
+      --gray-900: #111827;
+      --gray-800: #1f2937;
+      --gray-700: #374151;
+      --gray-600: #4b5563;
+      --gray-500: #6b7280;
+      --gray-400: #9ca3af;
+      --gray-300: #d1d5db;
+      --gray-200: #e5e7eb;
+      --gray-100: #f3f4f6;
+      --gray-50: #f9fafb;
+      --white: #ffffff;
+      --green-600: #059669;
+      --green-100: #d1fae5;
+      --amber-600: #d97706;
+      --amber-100: #fef3c7;
+      --red-600: #dc2626;
+      --red-100: #fee2e2;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      line-height: 1.6;
+    }
+    pre, code, .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-700) 50%, var(--blue-600) 100%);
+      color: var(--white);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      position: relative;
+    }
+    header h1 span { color: var(--blue-400); }
+    header p {
+      font-size: 1.125rem;
+      opacity: 0.85;
+      margin-top: 0.5rem;
+      position: relative;
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(4px);
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+      position: relative;
+    }
+
+    /* Navigation */
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    nav .inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      gap: 0.25rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    nav .inner::-webkit-scrollbar { display: none; }
+    nav a {
+      display: block;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--gray-600);
+      text-decoration: none;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    nav a:hover, nav a:focus { color: var(--blue-600); border-bottom-color: var(--blue-400); }
+
+    /* Layout */
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* Hero section */
+    .hero {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+    }
+    .hero h2 { font-size: 1.75rem; font-weight: 600; color: var(--blue-800); }
+    .hero p { color: var(--gray-600); max-width: 700px; margin: 0.75rem auto 0; }
+    .hero-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .hero-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .hero-links a.primary { background: var(--blue-600); color: var(--white); }
+    .hero-links a.primary:hover { background: var(--blue-700); }
+    .hero-links a.secondary { background: var(--gray-100); color: var(--gray-700); }
+    .hero-links a.secondary:hover { background: var(--gray-200); }
+
+    /* Sections */
+    section {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+    section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--blue-800);
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    section h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--gray-800);
+      margin: 1.5rem 0 0.75rem;
+    }
+    section h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin: 1rem 0 0.5rem;
+    }
+    section .body { padding: 1.5rem; }
+    section .body > * + * { margin-top: 1rem; }
+
+    .section-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .section-link:hover { box-shadow: var(--shadow-lg); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      margin: 0.75rem 0;
+    }
+    thead { background: var(--gray-100); }
+    th {
+      text-align: left;
+      padding: 0.6rem 0.75rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      border-bottom: 2px solid var(--gray-200);
+    }
+    td {
+      padding: 0.6rem 0.75rem;
+      border-bottom: 1px solid var(--gray-100);
+      vertical-align: top;
+    }
+    tr:hover td { background: var(--gray-50); }
+    table.compact td, table.compact th { padding: 0.4rem 0.6rem; }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      transition: box-shadow 0.15s;
+    }
+    .card:hover { box-shadow: var(--shadow); }
+    .card h4 { margin: 0 0 0.5rem; color: var(--blue-700); }
+    .card p { font-size: 0.875rem; color: var(--gray-600); }
+    .card .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+    .tag-green { background: var(--green-100); color: var(--green-600); }
+    .tag-amber { background: var(--amber-100); color: var(--amber-600); }
+    .tag-red { background: var(--red-100); color: var(--red-600); }
+    .tag-blue { background: var(--blue-100); color: var(--blue-700); }
+
+    /* Code / Pre */
+    pre {
+      background: var(--gray-900);
+      color: #e5e7eb;
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.8rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+    }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: var(--gray-100);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+    }
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    /* Lists */
+    ul, ol { padding-left: 1.5rem; }
+    li { margin: 0.3rem 0; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Status badges */
+    .status { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .status-live { background: var(--green-100); color: var(--green-600); }
+    .status-warn { background: var(--amber-100); color: var(--amber-600); }
+    .status-down { background: var(--red-100); color: var(--red-600); }
+
+    /* KPI grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .kpi {
+      text-align: center;
+      padding: 1.25rem;
+      background: var(--blue-50);
+      border-radius: var(--radius);
+    }
+    .kpi .value { font-size: 1.75rem; font-weight: 700; color: var(--blue-700); }
+    .kpi .label { font-size: 0.8rem; color: var(--gray-600); margin-top: 0.25rem; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      color: var(--gray-500);
+      font-size: 0.875rem;
+      border-top: 1px solid var(--gray-200);
+      margin-top: 2rem;
+    }
+    footer a { color: var(--blue-600); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* Architecture diagram */
+    .arch-diagram {
+      text-align: center;
+      padding: 1rem 0;
+    }
+    .arch-diagram pre {
+      display: inline-block;
+      text-align: left;
+      background: var(--gray-900);
+      color: #e5e7eb;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header h1 { font-size: 1.75rem; }
+      header { padding: 2rem 1rem; }
+      .container { padding: 1rem; }
+      section .body { padding: 1rem; }
+      section h2 { padding: 1rem; font-size: 1.1rem; }
+      table { font-size: 0.8rem; }
+      th, td { padding: 0.4rem 0.5rem; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* Print */
+    @media print {
+      nav { display: none; }
+      header { padding: 1.5rem; }
+      section { break-inside: avoid; box-shadow: none; border: 1px solid var(--gray-200); }
+      .hero-links a { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>IDD<span>.</span>peviitor<span>.ro</span></h1>
+  <p>Infrastructure Design Document — Documentație Infrastructură</p>
+  <div class="badge">v1.0 &mdash; Iunie 2026</div>
+</header>
+
+<nav>
+  <div class="inner">
+    <a href="#topologie">Topologie</a>
+    <a href="#api-server">API Server</a>
+    <a href="#solr-server">SOLR Server</a>
+    <a href="#test-server">Test Server</a>
+    <a href="#retea">Rețea</a>
+    <a href="#dns">DNS & CloudFlare</a>
+    <a href="#deployment">Deployment</a>
+    <a href="#monitoring">Monitorizare</a>
+    <a href="#backup">Backup & DR</a>
+    <a href="#securitate">Securitate</a>
+    <a href="#inventar">Inventar</a>
+  </div>
+</nav>
+
+<main class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h2>Motor de căutare a locurilor de muncă din România</h2>
+    <p>Infrastructura hardware și software a platformei <strong>peviitor.ro</strong> — acoperind topologia rețelei, configurația serverelor, arhitectura de deployment, backup și securitate.</p>
+    <div class="hero-links">
+      <a href="https://peviitor.ro" class="primary" target="_blank" rel="noopener">Platforma Live &rarr;</a>
+      <a href="https://sad.peviitor.ro" class="secondary" target="_blank" rel="noopener">SAD</a>
+      <a href="https://github.com/peviitor-ro" class="secondary" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+
+  <!-- Topologie -->
+  <section id="topologie">
+    <h2>&#8288;&#127961;&#65039; Topologia Infrastructurii</h2>
+    <div class="body">
+      <p>Platforma rulează pe trei Raspberry Pi în rețeaua locală RCS&RDS, cu frontend-ul găzduit pe GitHub Pages:</p>
+      <div class="arch-diagram">
+<pre>+------------------------------------------------------------------+
+|                      RCS&RDS (ISP)                               |
+|                     IP Dinamic 86.122.35.88                       |
+|                     Fibra Optica (1 Gbps)                         |
++--------------------------------+---------------------------------+
+                                 |
+                         +-------v--------+
+                         |    ONT (ONU)   |
+                         |   Fibra -> Ethernet |
+                         +-------+--------+
+                                 |
+                         +-------v--------+
+                         |   Router WiFi 6 |
+                         |   192.168.1.1   |
+                         |   NAT, Port Fwd |
+                         +-------+--------+
+                                 |
+                         +-------v--------+
+                         | Switch Gigabit  |
+                         |   1 Gbps       |
+                         +-------+--------+
+                                 |
+            +--------------------+--------------------+
+            |                    |                    |
+    +-------v--------+   +-------v--------+   +------v--------+
+    | RPi 5 (16GB)   |   | RPi 5 (4GB)    |   | RPi 4         |
+    | SOLR Server    |   | API Server     |   | TEST Server   |
+    | Productie      |   | Productie      |   | test.peviitor.ro|
+    | 192.168.1.134  |   | 192.168.1.135  |   | 192.168.1.130 |
+    |                |   |                |   |               |
+    | Docker:        |   | Docker:        |   | Docker:       |
+    | solr:10-slim   |   | peviitor-api   |   | peviitor-api  |
+    | :8983          |   | orase-api      |   | (Apache PHP)  |
+    |                |   | nginx-proxy-mgr|   | peviitor-solr |
+    |                |   | :80/443/81     |   | :8983         |
+    |                |   |                |   | OpenResty     |
+    |                |   |                |   | :80/443       |
+    +----------------+   +----------------+   +---------------+
+
+                    +-------------------------+
+                    |   GitHub Pages          |
+                    |   Frontend (React)      |
+                    |   peviitor.ro           |
+                    +-------------------------+
+
+                    +-------------------------+
+                    |   GitHub Actions        |
+                    |   Scrapers (cron)       |
+                    |   Python/Node/JMeter    |
+                    +-------------------------+
+
+                    +-------------------------+
+                    |   CloudFlare            |
+                    |   CDN, DNS, SSL, DDoS   |
+                    +-------------------------+</pre>
+      </div>
+
+      <h3>Flux trafic</h3>
+      <pre>Utilizator (Browser)
+    |
+    | HTTPS (peviitor.ro)
+    v
+CloudFlare (CDN, SSL, cache)
+    |
+    | DNS: zimbor.go.ro
+    v
+RCS&RDS (fibra optica 1 Gbps)
+    |
+    v
+ONT (fibra &rarr; Ethernet)
+    |
+    v
+Router WiFi 6 (NAT, port forwarding :80/:443)
+    |
+    v
+Switch Gigabit (1 Gbps)
+    |
+    v
+RPi API (Nginx Proxy Manager)
+    |
+    | :8080 (PHP BFF)
+    v
+RPi SOLR (HTTP LAN :8983)
+    |
+    v
+Index SOLR (job / company)</pre>
+    </div>
+  </section>
+
+  <!-- API Server -->
+  <section id="api-server">
+    <h2>&#8288;&#128421;&#65039; Server API — Raspberry Pi 5 (4GB)</h2>
+    <div class="body">
+      <div class="grid-2">
+        <div>
+          <h3>Hardware</h3>
+          <table class="compact">
+            <tr><td><strong>Model</strong></td><td>Raspberry Pi 5 Model B Rev 1.0</td></tr>
+            <tr><td><strong>SoC</strong></td><td>Broadcom BCM2712 (Cortex-A76, 4 nuclee)</td></tr>
+            <tr><td><strong>RAM</strong></td><td>4 GB LPDDR4X</td></tr>
+            <tr><td><strong>Stocare</strong></td><td>MicroSD 59.4 GB (25 GB folosiți)</td></tr>
+            <tr><td><strong>GPU</strong></td><td>VideoCore VII</td></tr>
+            <tr><td><strong>Rețea</strong></td><td>Ethernet 1000 Mbps (eth0: 192.168.1.135/24)</td></tr>
+            <tr><td><strong>Temperatură</strong></td><td>~49.9 &deg;C</td></tr>
+          </table>
+        </div>
+        <div>
+          <h3>Software</h3>
+          <table class="compact">
+            <tr><td><strong>OS</strong></td><td>Debian 12 (Bookworm)</td></tr>
+            <tr><td><strong>Kernel</strong></td><td>Linux 6.12.87+rpt-rpi-2712 (aarch64)</td></tr>
+            <tr><td><strong>Hostname</strong></td><td><code>api</code></td></tr>
+            <tr><td><strong>Window Manager</strong></td><td>labwc (Wayland)</td></tr>
+            <tr><td><strong>VNC</strong></td><td>wayvnc (rpi-connect)</td></tr>
+            <tr><td><strong>Docker</strong></td><td>Engine + Compose</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <h3>Containere Docker</h3>
+      <table class="compact">
+        <thead><tr><th>Nume</th><th>Imagine</th><th>Porturi</th><th>Rol</th></tr></thead>
+        <tbody>
+          <tr><td>peviitor-api</td><td>php:8.3-apache</td><td>8080 &rarr; 80</td><td>API BFF principal</td></tr>
+          <tr><td>orase-api</td><td>php:8.3-apache</td><td>8081 &rarr; 80</td><td>API orase.peviitor.ro</td></tr>
+          <tr><td>npm-app</td><td>jc21/nginx-proxy-manager</td><td>80, 81, 443</td><td>Reverse proxy, SSL</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Runtime-uri</h3>
+      <table class="compact">
+        <tr><td><strong>Node.js</strong></td><td>v20.20.2</td></tr>
+        <tr><td><strong>Python</strong></td><td>3.11.2</td></tr>
+        <tr><td><strong>GCC</strong></td><td>12</td></tr>
+      </table>
+
+      <h3>Servicii systemd</h3>
+      <p>docker, netdata, ssh, solr-monitor (Discord), avahi-daemon, cron</p>
+
+      <p><a href="https://github.com/peviitor-ro/idd/blob/main/api-server-detalii.txt" target="_blank" rel="noopener">Vezi detalii complete &rarr;</a></p>
+    </div>
+  </section>
+
+  <!-- SOLR Server -->
+  <section id="solr-server">
+    <h2>&#8288;&#128269; Server SOLR — Raspberry Pi 5 (16GB)</h2>
+    <div class="body">
+      <div class="grid-2">
+        <div>
+          <h3>Hardware</h3>
+          <table class="compact">
+            <tr><td><strong>Model</strong></td><td>Raspberry Pi 5 Model B Rev 1.1</td></tr>
+            <tr><td><strong>CPU</strong></td><td>ARM Cortex-A76, 4 nuclee @ 2.4 GHz</td></tr>
+            <tr><td><strong>Cache</strong></td><td>L1d 256 KiB, L1i 256 KiB, L2 2 MiB, L3 2 MiB</td></tr>
+            <tr><td><strong>RAM</strong></td><td>16 GB LPDDR4X (15 GiB usable)</td></tr>
+            <tr><td><strong>Swap</strong></td><td>16 GiB swapfile + 2 GiB zram (zstd)</td></tr>
+            <tr><td><strong>Stocare</strong></td><td>microSD 64 GB (33 GB folosiți)</td></tr>
+            <tr><td><strong>Rețea</strong></td><td>Ethernet 1000 Mbps (eth0: 192.168.1.134/24)</td></tr>
+          </table>
+        </div>
+        <div>
+          <h3>Software</h3>
+          <table class="compact">
+            <tr><td><strong>OS</strong></td><td>Debian 13 (Trixie) v13.5</td></tr>
+            <tr><td><strong>Kernel</strong></td><td>6.18.29+rpt-rpi-2712 (aarch64)</td></tr>
+            <tr><td><strong>Hostname</strong></td><td><code>solr-pi</code></td></tr>
+            <tr><td><strong>Docker</strong></td><td>CE 29.5.2 + Compose 5.1.4</td></tr>
+            <tr><td><strong>Python</strong></td><td>3.13.5</td></tr>
+            <tr><td><strong>Node.js</strong></td><td>v24.16.0</td></tr>
+            <tr><td><strong>GCC</strong></td><td>14.2.0</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <h3>Container Docker</h3>
+      <table class="compact">
+        <thead><tr><th>Nume</th><th>Imagine</th><th>Porturi</th><th>Rol</th></tr></thead>
+        <tbody>
+          <tr><td>solr-container</td><td>solr:10-slim</td><td>0.0.0.0:8983 &rarr; 8983</td><td>Apache SOLR search engine</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Imagini stocate:</strong> solr:latest (1.25 GB), solr:9-slim (531 MB), solr:10-slim (675 MB), alpine, jq</p>
+
+      <p><a href="https://github.com/peviitor-ro/idd/blob/main/solr-server-detalii.txt" target="_blank" rel="noopener">Vezi detalii complete &rarr;</a></p>
+    </div>
+  </section>
+
+  <!-- Test Server -->
+  <section id="test-server">
+    <h2>&#8288;&#128268; Server TEST — Raspberry Pi 4</h2>
+    <div class="body">
+      <table class="compact">
+        <tr><td><strong>Model</strong></td><td>Raspberry Pi 4 (ARM Cortex-A72, 4 nuclee)</td></tr>
+        <tr><td><strong>RAM</strong></td><td>1.8 GB usable</td></tr>
+        <tr><td><strong>Stocare</strong></td><td>microSD 58 GB (~46 GB liberi)</td></tr>
+        <tr><td><strong>IP Local</strong></td><td>192.168.1.130/24</td></tr>
+        <tr><td><strong>OS</strong></td><td>Debian 13 (Trixie), kernel 6.12 (aarch64)</td></tr>
+        <tr><td><strong>Reverse Proxy</strong></td><td>OpenResty (nginx + LuaJIT) — port 80/443</td></tr>
+        <tr><td><strong>TLS</strong></td><td>Let's Encrypt (ECDSA P-384, TLS 1.3, AES-256-GCM)</td></tr>
+        <tr><td><strong>Docker</strong></td><td>peviitor-api (Apache PHP 8.2, port 8081), peviitor-solr (Solr 10.0.0, port 8983)</td></tr>
+        <tr><td><strong>Frontend</strong></td><td>React SPA (search-engine, build mode <code>qa</code>) servit de Apache</td></tr>
+        <tr><td><strong>API</strong></td><td>PHP BFF v0/v1 + Swagger UI</td></tr>
+        <tr><td><strong>SOLR</strong></td><td>Core-uri <code>job</code> + <code>company</code> (subset ~5k joburi)</td></tr>
+        <tr><td><strong>Rol</strong></td><td>Mediu de test (test.peviitor.ro, testsolr.peviitor.ro)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- Retea -->
+  <section id="retea">
+    <h2>&#8288;&#127760; Rețea</h2>
+    <div class="body">
+      <h3>Topologie rețea locală</h3>
+      <table class="compact">
+        <thead><tr><th>Dispozitiv</th><th>IP</th><th>Rol</th></tr></thead>
+        <tbody>
+          <tr><td>ONT (ONU)</td><td>&mdash;</td><td>Convertor fibra optică &rarr; Ethernet</td></tr>
+          <tr><td>Router WiFi 6</td><td>192.168.1.1</td><td>NAT, port forwarding, Wi-Fi</td></tr>
+          <tr><td>Switch Gigabit</td><td>&mdash;</td><td>Conectare RPi-uri (4 porturi 1 Gbps)</td></tr>
+          <tr><td>RPi 5 SOLR</td><td>192.168.1.134</td><td>SOLR producție (16GB)</td></tr>
+          <tr><td>RPi 5 API</td><td>192.168.1.135</td><td>API producție (4GB)</td></tr>
+          <tr><td>RPi 4 TEST</td><td>192.168.1.130</td><td>Mediu test (test.peviitor.ro)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Acces extern</h3>
+      <table class="compact">
+        <thead><tr><th>Serviciu</th><th>URL</th><th>Metodă</th></tr></thead>
+        <tbody>
+          <tr><td>Frontend</td><td><a href="https://peviitor.ro" target="_blank">peviitor.ro</a></td><td>GitHub Pages + CloudFlare</td></tr>
+          <tr><td>API BFF</td><td><a href="https://api.peviitor.ro" target="_blank">api.peviitor.ro</a></td><td>DDNS + Nginx Proxy Manager</td></tr>
+          <tr><td>SOLR</td><td><a href="https://solr.peviitor.ro" target="_blank">solr.peviitor.ro</a></td><td>Prin API (indirect)</td></tr>
+          <tr><td>Test</td><td><a href="https://test.peviitor.ro" target="_blank">test.peviitor.ro</a></td><td>RPi 4 — OpenResty</td></tr>
+        </tbody>
+      </table>
+
+      <h3>DDNS</h3>
+      <table class="compact">
+        <tr><td><strong>Furnizor</strong></td><td>go.ro</td></tr>
+        <tr><td><strong>Hostname</strong></td><td>zimbor.go.ro</td></tr>
+        <tr><td><strong>IP actual</strong></td><td>86.122.35.88</td></tr>
+        <tr><td><strong>ISP</strong></td><td>RCS&RDS (IP dinamic)</td></tr>
+        <tr><td><strong>Viteză</strong></td><td>1 Gbps</td></tr>
+        <tr><td><strong>Port forwarding</strong></td><td><code>:80</code> &rarr; 192.168.1.135:80, <code>:443</code> &rarr; 192.168.1.135:443</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- DNS & CloudFlare -->
+  <section id="dns">
+    <h2>&#8288;&#9729;&#65039; DNS &amp; CloudFlare</h2>
+    <div class="body">
+      <h3>Domeniul peviitor.ro</h3>
+      <table class="compact">
+        <tr><td><strong>Domeniu</strong></td><td>peviitor.ro</td></tr>
+        <tr><td><strong>Registrar</strong></td><td>Claus Web SRL</td></tr>
+        <tr><td><strong>Nameservere</strong></td><td>maria.ns.cloudflare.com, razvan.ns.cloudflare.com</td></tr>
+        <tr><td><strong>SSL</strong></td><td>Full (strict) — certificat CloudFlare</td></tr>
+        <tr><td><strong>CDN</strong></td><td>Proxy activ (orange cloud) pentru domeniile marcate</td></tr>
+      </table>
+
+      <h3>Înregistrări DNS principale</h3>
+      <div class="grid-2">
+        <div>
+          <h4>A Records (frontend GitHub Pages)</h4>
+          <table class="compact">
+            <thead><tr><th>Nume</th><th>IP</th></tr></thead>
+            <tbody>
+              <tr><td>peviitor.ro</td><td>185.199.108.153</td></tr>
+              <tr><td>peviitor.ro</td><td>185.199.109.153</td></tr>
+              <tr><td>peviitor.ro</td><td>185.199.110.153</td></tr>
+              <tr><td>peviitor.ro</td><td>185.199.111.153</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <h4>CNAME &rarr; GitHub Pages</h4>
+          <table class="compact">
+            <thead><tr><th>Nume</th><th>Target</th></tr></thead>
+            <tbody>
+              <tr><td>sad.peviitor.ro</td><td>peviitor-ro.github.io</td></tr>
+              <tr><td>romania.peviitor.ro</td><td>peviitor-ro.github.io</td></tr>
+              <tr><td>v01.peviitor.ro</td><td>peviitor-ro.github.io</td></tr>
+              <tr><td>www.peviitor.ro</td><td>peviitor-ro.github.io</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3>CNAME &rarr; DDNS zimbor.go.ro (infrastructură locală)</h3>
+      <table class="compact">
+        <thead><tr><th>Nume</th><th>Proxy</th></tr></thead>
+        <tbody>
+          <tr><td>api.peviitor.ro</td><td><span class="status status-live">Da</span></td></tr>
+          <tr><td>netdata.peviitor.ro</td><td><span class="status status-live">Da</span></td></tr>
+          <tr><td>orase.peviitor.ro</td><td><span class="status status-warn">Nu</span></td></tr>
+          <tr><td>solr.peviitor.ro</td><td><span class="status status-warn">Nu</span></td></tr>
+          <tr><td>test.peviitor.ro</td><td><span class="status status-warn">Nu</span></td></tr>
+          <tr><td>testsolr.peviitor.ro</td><td><span class="status status-warn">Nu</span></td></tr>
+          <tr><td>pi5.peviitor.ro</td><td><span class="status status-live">Da</span></td></tr>
+          <tr><td>sebi.peviitor.ro</td><td><span class="status status-live">Da</span></td></tr>
+        </tbody>
+      </table>
+      <p><small>Vezi documentul complet pentru lista exhaustivă (MX, TXT, etc.)</small></p>
+    </div>
+  </section>
+
+  <!-- Deployment -->
+  <section id="deployment">
+    <h2>&#8288;&#128640; Arhitectura de Deployment</h2>
+    <div class="body">
+      <h3>Componente și unde rulează</h3>
+      <table class="compact">
+        <thead><tr><th>Componentă</th><th>Unde rulează</th><th>URL</th></tr></thead>
+        <tbody>
+          <tr><td>Frontend (React)</td><td>GitHub Pages</td><td><a href="https://peviitor.ro" target="_blank">peviitor.ro</a></td></tr>
+          <tr><td>API BFF (PHP)</td><td>RPi API — Docker</td><td><a href="https://api.peviitor.ro" target="_blank">api.peviitor.ro</a></td></tr>
+          <tr><td>API Orașe (PHP)</td><td>RPi API — Docker</td><td><a href="https://orase.peviitor.ro" target="_blank">orase.peviitor.ro</a></td></tr>
+          <tr><td>SOLR Search</td><td>RPi SOLR — Docker</td><td><a href="https://solr.peviitor.ro" target="_blank">solr.peviitor.ro</a></td></tr>
+          <tr><td>Validator</td><td>Netlify</td><td><a href="https://admin.peviitor.ro" target="_blank">admin.peviitor.ro</a></td></tr>
+          <tr><td>Scrapers</td><td>GitHub Actions</td><td>&mdash;</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Nginx Proxy Manager</h3>
+      <p>Rulează pe RPi API (porturile 80/81/443), face SSL termination cu Let's Encrypt și direcționează traficul după domeniu:</p>
+      <table class="compact">
+        <tr><td><code>api.peviitor.ro</code></td><td>&rarr;</td><td><code>peviitor-api:80</code></td></tr>
+        <tr><td><code>orase.peviitor.ro</code></td><td>&rarr;</td><td><code>orase-api:80</code></td></tr>
+        <tr><td><code>solr.peviitor.ro</code></td><td>&rarr;</td><td><code>192.168.1.134:8983</code> (Basic Auth)</td></tr>
+        <tr><td><code>test.peviitor.ro</code></td><td>&rarr;</td><td>RPi 4 TEST</td></tr>
+      </table>
+
+      <h3>Pipeline CI/CD</h3>
+      <pre>Developer commit &rarr; GitHub &rarr; GitHub Actions
+                                |
+                    +-----------+-----------+
+                    |           |           |
+                    v           v           v
+                Lint        Test        Build
+                    |           |           |
+                    +-----------+-----------+
+                                |
+                    +-----------+-----------+
+                    |           |           |
+                    v           v           v
+              Frontend      API         SOLR config
+              (gh-pages)    (Docker)    (manual)</pre>
+    </div>
+  </section>
+
+  <!-- Monitorizare -->
+  <section id="monitoring">
+    <h2>&#8288;&#128200; Servicii și Monitorizare</h2>
+    <div class="body">
+      <div class="card-grid">
+        <div class="card">
+          <h4>Netdata</h4>
+          <p>Monitorizare RPi API (CPU, RAM, disk, rețea, temperatură) &mdash; Port 19999 (LAN)</p>
+          <span class="tag tag-green">v2.10.0</span>
+        </div>
+        <div class="card">
+          <h4>Sentry</h4>
+          <p>Error monitoring frontend + API</p>
+        </div>
+        <div class="card">
+          <h4>CloudFlare Analytics</h4>
+          <p>Trafic, cache, securitate</p>
+        </div>
+        <div class="card">
+          <h4>Microsoft Clarity</h4>
+          <p>Comportament utilizatori (frontend)</p>
+        </div>
+        <div class="card">
+          <h4>solr-monitor</h4>
+          <p>Discord webhook pentru status SOLR</p>
+          <span class="tag tag-amber">Discord</span>
+        </div>
+        <div class="card">
+          <h4>Raspberry Pi Connect</h4>
+          <p>Acces remote prin browser (wayvnc)</p>
+          <span class="tag tag-blue">v2.11.0</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Backup -->
+  <section id="backup">
+    <h2>&#8288;&#128187; Backup și Disaster Recovery</h2>
+    <div class="body">
+      <h3>Strategie backup</h3>
+      <table class="compact">
+        <thead><tr><th>Componentă</th><th>Frecvență</th><th>Metodă</th><th>Retenție</th></tr></thead>
+        <tbody>
+          <tr><td>Index SOLR</td><td>Zilnic (02:00)</td><td>Script shell + snapshot</td><td>7 zile</td></tr>
+          <tr><td>Configurație Docker</td><td>Manual (la modificare)</td><td>Git commit</td><td>Permanent</td></tr>
+          <tr><td>API source code</td><td>Continuu</td><td>GitHub</td><td>Permanent</td></tr>
+          <tr><td>Frontend source code</td><td>Continuu</td><td>GitHub</td><td>Permanent</td></tr>
+          <tr><td>Nginx Proxy Manager</td><td>Manual</td><td>Export UI</td><td>&mdash;</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Procedură restore SOLR</h3>
+      <pre>docker stop solr-container
+# Restaurare snapshot din backup
+docker start solr-container
+curl -u user:pass "http://localhost:8983/solr/job/select?q=*:*&rows=1"</pre>
+
+      <h3>Riscuri</h3>
+      <table class="compact">
+        <thead><tr><th>Risc</th><th>Impact</th><th>Mitigare</th></tr></thead>
+        <tbody>
+          <tr><td>Defecțiune microSD</td><td>Pierdere date</td><td>Backup zilnic; înlocuire rapidă</td></tr>
+          <tr><td>IP dinamic RCS&RDS</td><td>Indisponibilitate externă</td><td>DDNS cu TTL scăzut</td></tr>
+          <tr><td>Single point of failure</td><td>API sau SOLR indisponibil</td><td>Scripturi de restore rapide</td></tr>
+          <tr><td>Fără replică SOLR</td><td>Pierdere index</td><td>Rebuild din scrapers + backup</td></tr>
+          <tr><td>Incendiu/furt</td><td>Pierdere totală hardware</td><td>Backup în cloud (GitHub)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Securitate -->
+  <section id="securitate">
+    <h2>&#8288;&#128274; Securitate</h2>
+    <div class="body">
+      <div class="card-grid">
+        <div class="card">
+          <h4>SOLR Basic Auth</h4>
+          <p>security.json activat pe container</p>
+        </div>
+        <div class="card">
+          <h4>CORS restricționat</h4>
+          <p>API acceptă doar domenii cunoscute</p>
+        </div>
+        <div class="card">
+          <h4>CloudFlare WAF</h4>
+          <p>Protecție DDoS și OWASP Top 10</p>
+        </div>
+        <div class="card">
+          <h4>SSL/TLS</h4>
+          <p>Let's Encrypt + CloudFlare Full (strict)</p>
+        </div>
+        <div class="card">
+          <h4>SSH</h4>
+          <p>Autentificare prin cheie &mdash; doar în LAN</p>
+        </div>
+        <div class="card">
+          <h4>Firewall</h4>
+          <p>iptables pe toate RPi-urile</p>
+        </div>
+        <div class="card">
+          <h4>GitHub Security</h4>
+          <p>Secret Scanning, CodeQL, Dependabot</p>
+        </div>
+        <div class="card">
+          <h4>Network Segmentation</h4>
+          <p>SOLR în LAN, API prin NPM, Frontend pe CDN</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Specificatii SOLR -->
+  <section>
+    <h2>&#8288;&#128218; Specificații SOLR</h2>
+    <div class="body">
+      <div class="grid-2">
+        <div>
+          <h3>Container</h3>
+          <table class="compact">
+            <tr><td><strong>Imagine</strong></td><td>solr:10-slim</td></tr>
+            <tr><td><strong>Port</strong></td><td>8983 (TCP)</td></tr>
+            <tr><td><strong>Autentificare</strong></td><td>Basic Auth (security.json)</td></tr>
+          </table>
+        </div>
+        <div>
+          <h3>Core-uri</h3>
+          <table class="compact">
+            <thead><tr><th>Core</th><th>Unique Key</th><th>Doc.</th></tr></thead>
+            <tbody>
+              <tr><td><code>job</code></td><td><code>url</code></td><td>~40,000+</td></tr>
+              <tr><td><code>company</code></td><td><code>id</code> (cif)</td><td>~1,000+</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Inventar -->
+  <section id="inventar">
+    <h2>&#8288;&#128451;&#65039; Inventar Hardware</h2>
+    <div class="body">
+      <table class="compact">
+        <thead><tr><th>Dispozitiv</th><th>RAM</th><th>Stocare</th><th>IP</th><th>OS</th><th>Rol</th></tr></thead>
+        <tbody>
+          <tr><td>RPi 5 API</td><td>4 GB</td><td>microSD 59.4 GB</td><td>192.168.1.135</td><td>Debian 12</td><td>API BFF + NPM</td></tr>
+          <tr><td>RPi 5 SOLR</td><td>16 GB + 16 GB swap + 2 GB zram</td><td>microSD 64 GB</td><td>192.168.1.134</td><td>Debian 13</td><td>Apache SOLR 10.x</td></tr>
+          <tr><td>RPi 4 TEST</td><td>1.8 GB</td><td>microSD 58 GB</td><td>192.168.1.130</td><td>Debian 13</td><td>test.peviitor.ro</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Rețea</h3>
+      <table class="compact">
+        <tr><td><strong>ISP</strong></td><td>RCS&RDS — fibra optică, 1 Gbps</td></tr>
+        <tr><td><strong>IP Public</strong></td><td>86.122.35.88 (dinamic)</td></tr>
+        <tr><td><strong>DDNS</strong></td><td>zimbor.go.ro</td></tr>
+        <tr><td><strong>Conexiune</strong></td><td>1000 Mbps (toate RPi-urile, Ethernet)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- Medii -->
+  <section>
+    <h2>&#8288;&#127970;&#65039; Medii</h2>
+    <div class="body">
+      <table class="compact">
+        <thead><tr><th>Mediu</th><th>Frontend</th><th>API</th><th>SOLR</th><th>Date</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Producție</strong></td><td><a href="https://peviitor.ro" target="_blank">peviitor.ro</a></td><td><a href="https://api.peviitor.ro" target="_blank">api.peviitor.ro</a></td><td><a href="https://solr.peviitor.ro" target="_blank">solr.peviitor.ro</a></td><td>Full (~40k joburi)</td></tr>
+          <tr><td><strong>Test</strong></td><td><a href="https://test.peviitor.ro" target="_blank">test.peviitor.ro</a></td><td><a href="https://test.peviitor.ro/swagger-ui" target="_blank">test.peviitor.ro/swagger-ui</a></td><td><a href="https://testsolr.peviitor.ro" target="_blank">testsolr.peviitor.ro</a></td><td>Subset (~5k joburi)</td></tr>
+          <tr><td><strong>Local</strong></td><td>localhost:3000</td><td>localhost/api</td><td>Docker local</td><td>Minimal (seed)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Glosar -->
+  <section>
+    <h2>&#8288;&#128214; Glosar</h2>
+    <div class="body">
+      <table>
+        <thead><tr><th>Termen</th><th>Definiție</th></tr></thead>
+        <tbody>
+          <tr><td><strong>BFF</strong></td><td>Backend for Frontend — API care servește specific clientului frontend</td></tr>
+          <tr><td><strong>DDNS</strong></td><td>Dynamic DNS — serviciu care actualizează DNS-ul pentru IP-uri dinamice</td></tr>
+          <tr><td><strong>NPM</strong></td><td>Nginx Proxy Manager — reverse proxy cu UI web</td></tr>
+          <tr><td><strong>RPi</strong></td><td>Raspberry Pi — computer single-board</td></tr>
+          <tr><td><strong>zram</strong></td><td>RAM comprimat folosit ca swap</td></tr>
+          <tr><td><strong>WAF</strong></td><td>Web Application Firewall</td></tr>
+          <tr><td><strong>CORS</strong></td><td>Cross-Origin Resource Sharing</td></tr>
+          <tr><td><strong>CodeQL</strong></td><td>Motor de analiză semantică GitHub pentru vulnerabilități</td></tr>
+          <tr><td><strong>Dependabot</strong></td><td>Bot GitHub care automatizează update-uri de dependințe</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>&copy; 2022&ndash;2026 <a href="https://peviitor.ro">peviitor.ro</a> &mdash; Open Source</p>
+  <p style="margin-top:0.25rem;">Document generat pe baza configuratiei hardware live, a documentului SAD si a inventarelor din repository.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+# Server SOLR — Raspberry Pi 5 (16GB)
+
+## Hardware
+
+| Component | Detalii |
+|-----------|---------|
+| **Model** | Raspberry Pi 5 Model B Rev 1.1 |
+| **CPU** | ARM Cortex-A76, 4 cores, 2.4 GHz max / 1.5 GHz min |
+| **Cache** | L1d 256 KiB, L1i 256 KiB, L2 2 MiB, L3 2 MiB |
+| **RAM** | 16 GB LPDDR4X (15 GiB usable) |
+| **Swap** | 16 GiB swapfile + 2 GiB zram (zstd) |
+| **GPU** | VideoCore VII (Mesa 25.0.7, Vulkan, VA-API) |
+| **Storage** | microSD 64 GB (boot FAT32 512 MB, root ext4 ~59 GB, 33 GB folosiți) |
+| **Arhitectură** | aarch64 (ARM v8) |
+| **Network** | eth0 1000BASE-T (192.168.1.134/24), docker0 (172.17.0.1/16) |
+
+## Software
+
+| Component | Detalii |
+|-----------|---------|
+| **OS** | Debian 13 (Trixie), v13.5 |
+| **Kernel** | 6.18.29+rpt-rpi-2712 #1 SMP PREEMPT |
+| **Hostname** | solr-pi |
+| **Uptime** | 4 zile |
+
+## Runtime-uri
+
+| Runtime | Versiune |
+|---------|----------|
+| Python | 3.13.5 |
+| Node.js | v24.16.0 |
+| npm | 11.13.0 |
+| GCC/G++ | 14.2.0 |
+| Git | 2.47.3 |
+| OpenSSL | 3.5.6 |
+
+## Docker
+
+| Component | Versiune |
+|-----------|---------|
+| Docker CE | 29.5.2 |
+| Docker Compose | 5.1.4 |
+
+### Containere active
+| Nume | Imagine | Porturi |
+|------|---------|---------|
+| solr-container | solr:10-slim | 0.0.0.0:8983->8983/tcp |
+
+### Imagini
+solr:latest (1.25 GB), solr:9-slim (531 MB), solr:10-slim (675 MB), alpine, jq
+
+## Rețea
+
+| Interfață | IP | MAC |
+|-----------|-----|-----|
+| eth0 | 192.168.1.134/24 | 88:a2:9e:a6:09:ef |
+| docker0 | 172.17.0.1/16 | — |
+
+## Aplicații notabile
+Chromium 148, Firefox 151, VLC, FFmpeg 7.1, GStreamer 1.26, Mesa 25.0.7

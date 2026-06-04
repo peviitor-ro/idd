@@ -1,0 +1,73 @@
+# Server API — Raspberry Pi 5 (4GB)
+
+## Hardware
+
+| Componentă | Detalii |
+|---|---|
+| **Model** | Raspberry Pi 5 Model B Rev 1.0 |
+| **SoC** | Broadcom BCM2712 (Cortex-A76, 4 nuclee, 64-bit) |
+| **CPU** | 4 nuclee @ ~2.4 GHz |
+| **RAM** | 4 GB LPDDR4X |
+| **Stocare** | MicroSD 59.4 GB (boot 512 MB vfat, rădăcină 58.9 GB ext4) — 25 GB folosiți, 31 GB liberi |
+| **GPU** | VideoCore VII (4 MB alocați) |
+| **Rețea** | Ethernet 1000 Mbps (eth0: 192.168.1.135/24) |
+| **Audio** | 2× HDMI audio |
+| **USB** | 4× USB (controller RP1) |
+| **Temperatură** | ~49.9 °C |
+| **Throttled** | 0x0 (fără throttling) |
+
+## Software
+
+### Sistem de operare
+- **OS:** Debian 12 (Bookworm)
+- **Kernel:** Linux 6.12.87+rpt-rpi-2712 (aarch64)
+- **Boot:** rpi-eeprom v69471177 (08.05.2025)
+- **Hostname:** `api`
+- **Uptime:** 4 zile, 10 ore
+
+### Mediu grafic
+- **Window manager:** labwc (Wayland)
+- **Display manager:** LightDM
+- **VNC:** wayvnc (rpi-connect)
+- **Browser:** Chromium 148.0.7778.167
+
+### Conectivitate
+- **Raspberry Pi Connect** — v2.11.0, acces remote prin browser
+- **SSH** — OpenSSH server activ
+
+### Docker
+- **Docker Engine** activ, cu docker-compose
+- **Containere active:**
+  | Nume | Imagine | Porturi |
+  |---|---|---|
+  | orase-api | php:8.3-apache | 8081 → 80 |
+  | peviitor-api | php:8.3-apache | 8080 → 80 |
+  | npm-app | jc21/nginx-proxy-manager | 80, 81, 443 |
+- **Total imagini:** php:8.3-apache, jc21/nginx-proxy-manager
+
+### Servicii systemd
+- `docker.service` — Container runtime
+- `netdata.service` — Monitoring
+- `ssh.service` — SSH
+- `solr-monitor.service` — Monitor SOLR (Discord webhook)
+- `avahi-daemon.service` — mDNS
+- `cron.service` — Scheduled tasks
+
+### Monitoring
+- **Netdata** — v2.10.0-314-nightly (/opt/netdata/)
+
+### Tooling
+| Tool | Versiune |
+|---|---|
+| Node.js | v20.20.2 |
+| npm | 10.8.2 |
+| Python | 3.11.2 |
+| GCC | 12 (build-essential) |
+| Git | instalat |
+| Make | instalat |
+
+### Pachete Python notabile
+Flask, Jinja2, requests, selenium, bs4, lxml, numpy, pillow, opencv, RPi.GPIO, gpiozero
+
+### Altele
+rpicam-apps, rpi-imager, htop, tree, jq, vim, curl, wget, Chromium

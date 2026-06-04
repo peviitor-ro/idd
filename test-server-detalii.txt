@@ -1,0 +1,68 @@
+# Server TEST — Raspberry Pi 4
+
+## Hardware
+
+| Component | Detalii |
+|-----------|---------|
+| **Model** | Raspberry Pi 4 (ARM Cortex-A72, 4 cores) |
+| **RAM** | 1.8 GB usable |
+| **Stocare** | microSD 58 GB (~46 GB liberi) |
+| **Arhitectură** | aarch64 |
+| **Rețea** | Ethernet 1000 Mbps (eth0: 192.168.1.130/24) |
+
+## Software
+
+| Component | Detalii |
+|-----------|---------|
+| **OS** | Debian 13 (Trixie), kernel 6.12 (aarch64) |
+| **Hostname** | (test) |
+| **Reverse Proxy** | OpenResty (nginx + LuaJIT) — port 80 (→301 HTTPS) / 443 |
+| **TLS** | Let's Encrypt (ECDSA P-384, TLS 1.3, AES-256-GCM) |
+
+## Rețea
+
+| Detaliu | Valoare |
+|---------|---------|
+| **IP Local** | 192.168.1.130/24 |
+| **IP Public** | 86.122.35.88 (prin NAT, port forwarding) |
+| **Hostname DNS inversat** | 86-122-35-88.rdsnet.ro |
+
+## Docker Containers
+
+| Nume | Imagine | Porturi | Rol |
+|------|---------|---------|-----|
+| peviitor-api | Apache PHP 8.2 | 8081 → 80 | API BFF test |
+| peviitor-solr | Solr 10.0.0 | 8983 → 8983 | SOLR test |
+
+## Servicii
+
+- **Docker Engine** — activ
+- **OpenResty** — reverse proxy (port 80/443)
+- **Apache PHP 8.2** — API (port 8081)
+- **SOLR** — index test (port 8983)
+- **Raspberry Pi Connect** — wayvnc (acces remote)
+
+## Frontend
+
+- React SPA (search-engine, build mode `qa`)
+- Servit de Apache pe portul 80 prin OpenResty
+
+## API
+
+- PHP BFF v0/v1 + Swagger UI
+- Accesibil la https://test.peviitor.ro/swagger-ui
+
+## SOLR
+
+- Core-uri: `job` + `company`
+- Subset de date (~5k joburi)
+- Autentificare Basic Auth
+- Accesibil la https://testsolr.peviitor.ro
+
+## Scop
+
+Mediu de test și integrare pentru:
+- Testare functională și UAT
+- Validare endpoint-uri API
+- Testare SOLR (conformitate schemă, diacritice, facet search)
+- Regresie înainte de deploy în producție
