@@ -1,6 +1,6 @@
 # Infrastructure Design Document (IDD) — peviitor.ro
 
-## Version 1.0 — June 2026
+## Version 1.1 — August 2026
 
 ---
 
