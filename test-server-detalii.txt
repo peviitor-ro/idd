@@ -6,7 +6,7 @@
 |-----------|---------|
 | **Model** | Raspberry Pi 4 (ARM Cortex-A72, 4 cores) |
 | **RAM** | 8 GB (7.6 GiB usable) |
-| **Swap** | 4 GB swap |
+| **Swap** | 4 GiB swap |
 | **Stocare** | microSD 64 GB (58 GB utilizabili, ~41 GB liberi) |
 | **Arhitectură** | aarch64 |
 | **Rețea** | Ethernet 1000 Mbps (eth0: 192.168.1.142/24) |
@@ -17,8 +17,8 @@
 |-----------|---------|
 | **OS** | Debian 13 (Trixie), kernel 6.18.39+rpt-rpi-v8 (aarch64) |
 | **Hostname** | pi4 |
-| **Reverse Proxy** | OpenResty (nginx + LuaJIT) — port 80 (→301 HTTPS) / 443 |
-| **TLS** | Let's Encrypt (ECDSA P-384, TLS 1.3, AES-256-GCM) |
+| **Web Server** | Apache HTTP Server (php:8.2-apache, container `peviitor-api`) — port extern 8081, servește frontend + API |
+| **TLS** | Terminat la edge (Nginx Proxy Manager pe RPi API — Let's Encrypt) |
 
 ## Rețea
 
@@ -27,6 +27,7 @@
 | **IP Local** | 192.168.1.142/24 |
 | **IP Public** | 86.122.35.88 (prin NAT, port forwarding) |
 | **Hostname DNS inversat** | 86-122-35-88.rdsnet.ro |
+| **Acces extern** | Traficul intră prin router → Nginx Proxy Manager (RPi API, 192.168.1.135) → RPi TEST. `test.peviitor.ro` → `192.168.1.142:8081` (Apache), `testsolr.peviitor.ro` → `192.168.1.142:8983` (SOLR) |
 
 ## Docker Containers
 
@@ -38,15 +39,14 @@
 ## Servicii
 
 - **Docker Engine** — activ
-- **OpenResty** — reverse proxy (port 80/443)
-- **Apache PHP 8.2** — API (port 8081)
-- **SOLR** — index test (port 8983)
+- **Apache PHP 8.2 (peviitor-api)** — frontend + API (port 8081)
+- **SOLR (peviitor-solr)** — index test (port 8983)
 - **Raspberry Pi Connect** — wayvnc (acces remote)
 
 ## Frontend
 
 - React SPA (search-engine, build mode `qa`)
-- Servit de Apache pe portul 80 prin OpenResty
+- Servit de Apache (container `peviitor-api`, port extern 8081)
 
 ## API
 

@@ -46,7 +46,7 @@ Acest document descrie infrastructura hardware si software a platformei **peviit
             +--------------------+--------------------+
             |                    |                    |
     +-------v--------+   +-------v--------+   +------v--------+
-    | RPi 5 (16GB)   |   | RPi 5 (4GB)    |   | RPi 4         |
+    | RPi 5 (16GB)   |   | RPi 5 (4GB)    |   | RPi 4 (8GB)   |
     | SOLR Server    |   | API Server     |   | TEST Server   |
     | Productie      |   | Productie      |   | test.peviitor.ro|
     | 192.168.1.134  |   | 192.168.1.135  |   | 192.168.1.142 |
@@ -56,8 +56,8 @@ Acest document descrie infrastructura hardware si software a platformei **peviit
     | :8983          |   | orase-api      |   | (Apache PHP)  |
     |                |   | nginx-proxy-mgr|   | peviitor-solr |
     |                |   | :80/443/81     |   | :8983         |
-    |                |   |                |   | OpenResty     |
-    |                |   |                |   | :80/443       |
+    |                |   |                |   | Apache        |
+    |                |   |                |   | :8081         |
     +----------------+   +----------------+   +---------------+
 
                     +-------------------------+
@@ -242,7 +242,7 @@ Index SOLR (job / company)
 | API BFF | https://api.peviitor.ro | DDNS + Nginx Proxy Manager |
 | SOLR public | https://solr.peviitor.ro | Prin API (indirect) |
 | SOLR admin | https://solr.peviitor.ro | Basic Auth (direct) |
-| Test frontend | https://test.peviitor.ro | RPi 4 — OpenResty |
+| Test frontend | https://test.peviitor.ro | RPi 4 — Apache (peviitor-api :8081) |
 | Test API | https://test.peviitor.ro/swagger-ui | RPi 4 — Apache PHP 8.2 |
 | Test SOLR | https://testsolr.peviitor.ro | RPi 4 — SOLR 10 (Basic Auth) |
 
@@ -361,8 +361,8 @@ Index SOLR (job / company)
   - `api.peviitor.ro` → `peviitor-api:80` (API BFF)
   - `orase.peviitor.ro` → `orase-api:80` (API orase)
   - `solr.peviitor.ro` → `192.168.1.134:8983` (cu Basic Auth)
-  - `test.peviitor.ro` → RPi 4 TEST (frontend)
-  - `testsolr.peviitor.ro` → RPi 4 TEST (SOLR test)
+  - `test.peviitor.ro` → `192.168.1.142:8081` (RPi 4 TEST — frontend + API, Apache)
+  - `testsolr.peviitor.ro` → `192.168.1.142:8983` (RPi 4 TEST — SOLR test)
   - Alte domenii (admin, etc.) după configurare
 
 ### 6.3 Pipeline CI/CD
@@ -429,8 +429,7 @@ Developer commit → GitHub → GitHub Actions
 | Serviciu | Status | Port |
 |---|---|---|
 | Docker Engine | activ | socket unix |
-| OpenResty | activ | 80/443 |
-| Apache PHP 8.2 (peviitor-api) | activ | 8081 |
+| Apache PHP 8.2 (peviitor-api — frontend + API) | activ | 8081 |
 | SOLR (peviitor-solr) | activ | 8983 |
 | Raspberry Pi Connect | activ | wayvnc (acces remote prin browser) |
 
@@ -565,14 +564,14 @@ curl "http://localhost:8983/solr/job/replication?command=restore&name=backup_202
 |---|---|
 | **Model** | Raspberry Pi 4 (ARM Cortex-A72, 4 nuclee) |
 | **RAM** | 8 GB (7.6 GiB usable) |
-| **Swap** | 4 GB swap |
+| **Swap** | 4 GiB swap |
 | **Stocare** | microSD 64 GB (58 GB utilizabili, ~41 GB liberi) |
 | **IP Local** | 192.168.1.142/24 |
 | **IP Public** | 86.122.35.88 (prin NAT, port forwarding) |
 | **Hostname DNS inversat** | 86-122-35-88.rdsnet.ro |
 | **OS** | Debian 13 (Trixie), kernel 6.18.39+rpt-rpi-v8 (aarch64) |
-| **Reverse Proxy** | OpenResty (nginx + LuaJIT) — port 80 (→301 HTTPS) / 443 |
-| **TLS** | Let's Encrypt (ECDSA P-384, TLS 1.3, AES-256-GCM) |
+| **Reverse Proxy** | Trafic extern prin Nginx Proxy Manager (RPi API) → `192.168.1.142:8081` (Apache) |
+| **TLS** | Terminat la edge (NPM pe RPi API — Let's Encrypt) |
 | **Docker Containers** | `peviitor-api` (Apache PHP 8.2, port 8081), `peviitor-solr` (Solr 10.0.0, port 8983) |
 | **Frontend** | React SPA (search-engine, build mode `qa`) servit de Apache |
 | **API** | PHP BFF v0/v1 + Swagger UI |

@@ -414,7 +414,7 @@
             +--------------------+--------------------+
             |                    |                    |
     +-------v--------+   +-------v--------+   +------v--------+
-    | RPi 5 (16GB)   |   | RPi 5 (4GB)    |   | RPi 4         |
+    | RPi 5 (16GB)   |   | RPi 5 (4GB)    |   | RPi 4 (8GB)   |
     | SOLR Server    |   | API Server     |   | TEST Server   |
     | Productie      |   | Productie      |   | test.peviitor.ro|
     | 192.168.1.134  |   | 192.168.1.135  |   | 192.168.1.142 |
@@ -424,8 +424,8 @@
     | :8983          |   | orase-api      |   | (Apache PHP)  |
     |                |   | nginx-proxy-mgr|   | peviitor-solr |
     |                |   | :80/443/81     |   | :8983         |
-    |                |   |                |   | OpenResty     |
-    |                |   |                |   | :80/443       |
+    |                |   |                |   | Apache        |
+    |                |   |                |   | :8081         |
     +----------------+   +----------------+   +---------------+
 
                     +-------------------------+
@@ -584,12 +584,12 @@ Index SOLR (job / company)</pre>
       <table class="compact">
         <tr><td><strong>Model</strong></td><td>Raspberry Pi 4 (ARM Cortex-A72, 4 nuclee)</td></tr>
         <tr><td><strong>RAM</strong></td><td>8 GB (7.6 GiB usable)</td></tr>
-        <tr><td><strong>Swap</strong></td><td>4 GB swap</td></tr>
+        <tr><td><strong>Swap</strong></td><td>4 GiB swap</td></tr>
         <tr><td><strong>Stocare</strong></td><td>microSD 64 GB (58 GB utilizabili, ~41 GB liberi)</td></tr>
         <tr><td><strong>IP Local</strong></td><td>192.168.1.142/24</td></tr>
         <tr><td><strong>OS</strong></td><td>Debian 13 (Trixie), kernel 6.18.39+rpt-rpi-v8 (aarch64)</td></tr>
-        <tr><td><strong>Reverse Proxy</strong></td><td>OpenResty (nginx + LuaJIT) — port 80/443</td></tr>
-        <tr><td><strong>TLS</strong></td><td>Let's Encrypt (ECDSA P-384, TLS 1.3, AES-256-GCM)</td></tr>
+        <tr><td><strong>Web Server</strong></td><td>Apache HTTP Server (php:8.2-apache, container <code>peviitor-api</code>) — port extern 8081, servește frontend + API</td></tr>
+        <tr><td><strong>TLS</strong></td><td>Terminat la edge (Nginx Proxy Manager pe RPi API — Let's Encrypt)</td></tr>
         <tr><td><strong>Docker</strong></td><td>peviitor-api (Apache PHP 8.2, port 8081), peviitor-solr (Solr 10.0.0, port 8983)</td></tr>
         <tr><td><strong>Frontend</strong></td><td>React SPA (search-engine, build mode <code>qa</code>) servit de Apache</td></tr>
         <tr><td><strong>API</strong></td><td>PHP BFF v0/v1 + Swagger UI</td></tr>
@@ -624,7 +624,7 @@ Index SOLR (job / company)</pre>
           <tr><td>Frontend</td><td><a href="https://peviitor.ro" target="_blank">peviitor.ro</a></td><td>GitHub Pages + CloudFlare</td></tr>
           <tr><td>API BFF</td><td><a href="https://api.peviitor.ro" target="_blank">api.peviitor.ro</a></td><td>DDNS + Nginx Proxy Manager</td></tr>
           <tr><td>SOLR</td><td><a href="https://solr.peviitor.ro" target="_blank">solr.peviitor.ro</a></td><td>Prin API (indirect)</td></tr>
-          <tr><td>Test</td><td><a href="https://test.peviitor.ro" target="_blank">test.peviitor.ro</a></td><td>RPi 4 — OpenResty</td></tr>
+          <tr><td>Test</td><td><a href="https://test.peviitor.ro" target="_blank">test.peviitor.ro</a></td><td>RPi 4 — Apache (peviitor-api :8081)</td></tr>
         </tbody>
       </table>
 
@@ -722,7 +722,8 @@ Index SOLR (job / company)</pre>
         <tr><td><code>api.peviitor.ro</code></td><td>&rarr;</td><td><code>peviitor-api:80</code></td></tr>
         <tr><td><code>orase.peviitor.ro</code></td><td>&rarr;</td><td><code>orase-api:80</code></td></tr>
         <tr><td><code>solr.peviitor.ro</code></td><td>&rarr;</td><td><code>192.168.1.134:8983</code> (Basic Auth)</td></tr>
-        <tr><td><code>test.peviitor.ro</code></td><td>&rarr;</td><td>RPi 4 TEST</td></tr>
+        <tr><td><code>test.peviitor.ro</code></td><td>&rarr;</td><td><code>192.168.1.142:8081</code> (frontend + API, Apache)</td></tr>
+        <tr><td><code>testsolr.peviitor.ro</code></td><td>&rarr;</td><td><code>192.168.1.142:8983</code> (SOLR test)</td></tr>
       </table>
 
       <h3>Pipeline CI/CD</h3>
