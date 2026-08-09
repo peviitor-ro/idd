@@ -581,7 +581,7 @@ curl "http://localhost:8983/solr/job/replication?command=restore&name=backup_202
 | **Conexiune** | Ethernet → Switch Gigabit |
 | **SSH** | Port 22 inchis public — administrare doar din LAN sau consola fizica |
 
-> **Istoric:** La 2026-08-09 s-a efectuat un upgrade hardware — RPi 4 (2 GB) → RPi 4 (8 GB), păstrându-se cardul microSD. RAM: 1.8 GB usable → 8 GB (7.6 GiB usable); adăugat swap 4 GB; IP local: 192.168.1.130 → 192.168.1.142.
+> **Istoric:** La 2026-08-09 s-a efectuat un upgrade hardware — RPi 4 (2 GB) → RPi 4 (8 GB), păstrându-se cardul microSD. RAM: 1.8 GB usable → 8 GB (7.6 GiB usable); adăugat swap 4 GB; IP local: 192.168.1.141 → 192.168.1.142.
 
 ### 11.4 Retea
 
@@ -627,7 +627,7 @@ curl "http://localhost:8983/solr/job/replication?command=restore&name=backup_202
 
 | Data | Component afectat | Modificare |
 |---|---|---|
-| 2026-08-09 | Server TEST (test.peviitor.ro) | **Upgrade hardware:** RPi 4 (2 GB) → RPi 4 (8 GB). Cardul microSD păstrat. RAM: 1.8 GB usable → 8 GB (7.6 GiB usable). Adăugat swap 4 GB. IP local: 192.168.1.130 → 192.168.1.142. Kernel: 6.12 → 6.18.39+rpt-rpi-v8. |
+| 2026-08-09 | Server TEST (test.peviitor.ro) | **Upgrade hardware:** RPi 4 (2 GB) → RPi 4 (8 GB). Cardul microSD păstrat. RAM: 1.8 GB usable → 8 GB (7.6 GiB usable). Adăugat swap 4 GB. IP local: 192.168.1.141 → 192.168.1.142. Kernel: 6.12 → 6.18.39+rpt-rpi-v8. |
 
 ---
 
