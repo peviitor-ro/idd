@@ -49,7 +49,7 @@ Acest document descrie infrastructura hardware si software a platformei **peviit
     | RPi 5 (16GB)   |   | RPi 5 (4GB)    |   | RPi 4         |
     | SOLR Server    |   | API Server     |   | TEST Server   |
     | Productie      |   | Productie      |   | test.peviitor.ro|
-    | 192.168.1.134  |   | 192.168.1.135  |   | 192.168.1.130 |
+    | 192.168.1.134  |   | 192.168.1.135  |   | 192.168.1.142 |
     |                |   |                |   |               |
     | Docker:        |   | Docker:        |   | Docker:       |
     | solr:10-slim   |   | peviitor-api   |   | peviitor-api  |
@@ -231,7 +231,7 @@ Index SOLR (job / company)
 | Switch Gigabit | — | 4 porturi 1 Gbps | Conectare RPi-uri la retea |
 | RPi 5 SOLR | 192.168.1.134 | eth0 → Switch | SOLR productie (16GB) |
 | RPi 5 API | 192.168.1.135 | eth0 → Switch | API productie (4GB) |
-| RPi 4 TEST | 192.168.1.130 | eth0 → Switch | Mediu test (test.peviitor.ro) |
+| RPi 4 TEST | 192.168.1.142 | eth0 → Switch | Mediu test (test.peviitor.ro) |
 | RPi SOLR (docker) | 172.17.0.1/16 | docker0 | Retea interna containere |
 
 ### 5.2 Acces extern
@@ -564,12 +564,13 @@ curl "http://localhost:8983/solr/job/replication?command=restore&name=backup_202
 | Element | Valoare |
 |---|---|
 | **Model** | Raspberry Pi 4 (ARM Cortex-A72, 4 nuclee) |
-| **RAM** | 1.8 GB usable |
-| **Stocare** | microSD 58 GB (~46 GB liberi) |
-| **IP Local** | 192.168.1.130/24 |
+| **RAM** | 8 GB (7.6 GiB usable) |
+| **Swap** | 4 GB swap |
+| **Stocare** | microSD 64 GB (58 GB utilizabili, ~41 GB liberi) |
+| **IP Local** | 192.168.1.142/24 |
 | **IP Public** | 86.122.35.88 (prin NAT, port forwarding) |
 | **Hostname DNS inversat** | 86-122-35-88.rdsnet.ro |
-| **OS** | Debian 13 (Trixie), kernel 6.12 (aarch64) |
+| **OS** | Debian 13 (Trixie), kernel 6.18.39+rpt-rpi-v8 (aarch64) |
 | **Reverse Proxy** | OpenResty (nginx + LuaJIT) — port 80 (→301 HTTPS) / 443 |
 | **TLS** | Let's Encrypt (ECDSA P-384, TLS 1.3, AES-256-GCM) |
 | **Docker Containers** | `peviitor-api` (Apache PHP 8.2, port 8081), `peviitor-solr` (Solr 10.0.0, port 8983) |
@@ -579,6 +580,8 @@ curl "http://localhost:8983/solr/job/replication?command=restore&name=backup_202
 | **Rol** | Mediu de test (test.peviitor.ro, testsolr.peviitor.ro) |
 | **Conexiune** | Ethernet → Switch Gigabit |
 | **SSH** | Port 22 inchis public — administrare doar din LAN sau consola fizica |
+
+> **Istoric:** La 2026-08-09 s-a efectuat un upgrade hardware — RPi 4 (2 GB) → RPi 4 (8 GB), păstrându-se cardul microSD. RAM: 1.8 GB usable → 8 GB (7.6 GiB usable); adăugat swap 4 GB; IP local: 192.168.1.130 → 192.168.1.142.
 
 ### 11.4 Retea
 
@@ -617,6 +620,14 @@ curl "http://localhost:8983/solr/job/replication?command=restore&name=backup_202
 | **CORS** | Cross-Origin Resource Sharing — restrictie acces intre domenii |
 | **CodeQL** | Motor de analiza semantica GitHub pentru vulnerabilitati |
 | **Dependabot** | Bot GitHub care automatizeaza update-uri de dependinte |
+
+---
+
+## 14. Istoric modificări
+
+| Data | Component afectat | Modificare |
+|---|---|---|
+| 2026-08-09 | Server TEST (test.peviitor.ro) | **Upgrade hardware:** RPi 4 (2 GB) → RPi 4 (8 GB). Cardul microSD păstrat. RAM: 1.8 GB usable → 8 GB (7.6 GiB usable). Adăugat swap 4 GB. IP local: 192.168.1.130 → 192.168.1.142. Kernel: 6.12 → 6.18.39+rpt-rpi-v8. |
 
 ---
 

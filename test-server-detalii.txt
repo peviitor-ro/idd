@@ -5,17 +5,18 @@
 | Component | Detalii |
 |-----------|---------|
 | **Model** | Raspberry Pi 4 (ARM Cortex-A72, 4 cores) |
-| **RAM** | 1.8 GB usable |
-| **Stocare** | microSD 58 GB (~46 GB liberi) |
+| **RAM** | 8 GB (7.6 GiB usable) |
+| **Swap** | 4 GB swap |
+| **Stocare** | microSD 64 GB (58 GB utilizabili, ~41 GB liberi) |
 | **Arhitectură** | aarch64 |
-| **Rețea** | Ethernet 1000 Mbps (eth0: 192.168.1.130/24) |
+| **Rețea** | Ethernet 1000 Mbps (eth0: 192.168.1.142/24) |
 
 ## Software
 
 | Component | Detalii |
 |-----------|---------|
-| **OS** | Debian 13 (Trixie), kernel 6.12 (aarch64) |
-| **Hostname** | (test) |
+| **OS** | Debian 13 (Trixie), kernel 6.18.39+rpt-rpi-v8 (aarch64) |
+| **Hostname** | pi4 |
 | **Reverse Proxy** | OpenResty (nginx + LuaJIT) — port 80 (→301 HTTPS) / 443 |
 | **TLS** | Let's Encrypt (ECDSA P-384, TLS 1.3, AES-256-GCM) |
 
@@ -23,7 +24,7 @@
 
 | Detaliu | Valoare |
 |---------|---------|
-| **IP Local** | 192.168.1.130/24 |
+| **IP Local** | 192.168.1.142/24 |
 | **IP Public** | 86.122.35.88 (prin NAT, port forwarding) |
 | **Hostname DNS inversat** | 86-122-35-88.rdsnet.ro |
 
@@ -66,3 +67,9 @@ Mediu de test și integrare pentru:
 - Validare endpoint-uri API
 - Testare SOLR (conformitate schemă, diacritice, facet search)
 - Regresie înainte de deploy în producție
+
+## Istoric modificări
+
+| Data | Modificare |
+|------|-----------|
+| 2026-08-09 | **Upgrade hardware:** RPi 4 (2 GB) → RPi 4 (8 GB). Cardul microSD a fost păstrat. RAM: 1.8 GB usable → 8 GB (7.6 GiB usable). Adăugat swap 4 GB. IP local: 192.168.1.130 → 192.168.1.142. Kernel actualizat la 6.18.39+rpt-rpi-v8. |
